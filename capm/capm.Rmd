@@ -1,0 +1,60 @@
+---
+title: "The Capital Asset Pricing Model (CAPM)"
+output: ioslides_presentation
+runtime: shiny
+smaller: true
+---
+
+
+# Introduction to CAPM
+
+## What is the CAPM?
+- **CAPM** stands for **Capital Asset Pricing Model**.
+- It is a financial model used to determine the expected return on an investment, given its risk relative to the market.
+
+- The CAPM helps investors understand the relationship between risk and return.
+- It's widely used for valuing securities and assessing investment opportunities.
+
+
+## Key Concept of the CAPM
+
+The Risk-Return Tradeoff
+
+- The **basic idea**: *A stock is riskier if its performance is closely correlated with other stocks in your portfolio.*
+- **Market Portfolio**: The CAPM assumes all investors will hold the market portfolio, which includes all available assets.
+
+Defining Risk
+- Risk in CAPM is not the asset's standalone volatility, but how it **contributes to the overall risk** of the market portfolio.
+
+
+## The CAPM Formula {.smaller}
+
+CAPM Equation
+
+- **Formula**: \( E(R_i) = R_f + \beta_i (E(R_m) - R_f) \)
+  
+  - \( E(R_i) \): Expected return of the asset
+  - \( R_f \): Risk-free rate
+  - \( \beta_i \): Beta of the asset (measure of its risk relative to the market)
+  - \( E(R_m) \): Expected return of the market
+
+where: 
+
+- **Risk-free rate**: The return of a risk-free investment, like government bonds.
+- **Beta**: Indicates the asset's sensitivity to market movements.
+- **Market Premium**: The additional return expected for investing in the market over a risk-free rate.
+
+
+## Beta description
+
+- **Beta** is a measure of an asset's risk relative to the market.
+- A beta of 1 means the asset moves in line with the market.
+- A beta greater than 1 means the asset is riskier than the market.
+- A beta less than 1 means the asset is less risky than the market.
+
+It is estimated by regressing the asset's returns against the market returns.
+
+## Regression (warning econometrics inbound)
+
+
+
