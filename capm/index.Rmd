@@ -87,10 +87,10 @@ where:
 
 ## Interpreting linear regression coefficients {.smaller}
 
-- The **intercept (\( \beta_0 \))** represents the expected value of \( y \) when \( x \) is zero.
+- The **intercept(\( \beta_0 \))** represents the expected value of \( y \) when \( x \) is zero.
   - Example: In predicting house prices, \( \beta_0 \) might represent the baseline price of a house with zero square footage.
   
-- The **slope (\( \beta_1 \))** tells us how much \( y \) changes for each one-unit increase in \( x \).
+- The **slope(\( \beta_1 \))** tells us how much \( y \) changes for each one-unit increase in \( x \).
 
   - If \( \beta_1 \) is positive, \( y \) increases as \( x \) increases.
   - If \( \beta_1 \) is negative, \( y \) decreases as \( x \) increases.
