@@ -43,6 +43,7 @@ where:
 - **Risk-free rate**: The return of a risk-free investment, like government bonds.
 - **Beta**: Indicates the asset's sensitivity to market movements.
 - **Market Premium**: The additional return expected for investing in the market over a risk-free rate.
+  - \( E(R_m) - R_f \): Market premium
 
 
 ## Beta description
@@ -54,7 +55,239 @@ where:
 
 It is estimated by regressing the asset's returns against the market returns.
 
-## Regression (warning econometrics inbound)
+## Regression - A quick refresher {.smaller}
 
+- **Linear Regression** is a statistical method for modeling the relationship between a dependent variable and one or more independent variables.
+- It helps us understand and quantify the relationship between variables.
+- Linear regression can also be used to make predictions based on this relationship.
+- The goal is to find the **best-fit line** that minimizes the difference between the observed values and the predicted values.
+
+ **Use Cases**
+ 
+- Predicting house prices based on square footage and location.
+- Estimating sales based on advertising spending.
+- Analyzing how stock returns are affected by market performance.
+
+## The linear regression equation {.smaller}
+
+The equation for a **simple linear regression** is:
+
+\[
+y = \beta_0 + \beta_1 x + \epsilon
+\]
+
+where:
+
+- \( y \): Dependent variable (outcome we’re predicting)
+- \( x \): Independent variable (predictor)
+- \( \beta_0 \): Intercept (value of \( y \) when \( x = 0 \))
+- \( \beta_1 \): Slope (change in \( y \) for a one-unit change in \( x \))
+- \( \epsilon \): Error term (captures variability in \( y \) not explained by \( x \))
+
+
+## Interpreting linear regression coefficients {.smaller}
+
+- The **intercept (\( \beta_0 \))** represents the expected value of \( y \) when \( x \) is zero.
+  - Example: In predicting house prices, \( \beta_0 \) might represent the baseline price of a house with zero square footage.
+  
+- The **slope (\( \beta_1 \))** tells us how much \( y \) changes for each one-unit increase in \( x \).
+
+  - If \( \beta_1 \) is positive, \( y \) increases as \( x \) increases.
+  - If \( \beta_1 \) is negative, \( y \) decreases as \( x \) increases.
+
+ Example Interpretation
+ 
+- Suppose we have a model where \( y = 500 + 200x \):
+  - \( \beta_0 = 500 \): Starting value of \( y \).
+  - \( \beta_1 = 200 \): For each one-unit increase in \( x \), \( y \) increases by 200.
+
+## Finding the Best-Fit Line: The Sum of Squared Residuals
+
+- **Residuals** are the differences between the observed values and the predicted values.
+- **Sum of Squared Residuals (SSR)** quantifies the overall error in the model:
+  \[
+  SSR = \sum (y_i - \hat{y}_i)^2
+  \]
+  - Where \( y_i \) is the observed value and \( \hat{y}_i \) is the predicted value for each data point.
+  - A smaller SSR indicates a better fit, as the line is closer to the data points.
+
+## Illustration {.smaller}
+
+Here we have observed values (points) and a line which we believe best fits the data.
+The values on the line are our predicted values, the distance between the points and the line are the residuals (red dotted lines)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(ggplot2)
+
+# Set fixed intercept and slope for the static plot
+intercept <- 2
+slope <- 0.5
+
+# Generate sample data
+set.seed(123)
+x <- seq(0, 20, by = 0.25)
+y <- 2 + 0.5 * x + rnorm(length(x), mean = 0, sd = 3)  # True relationship: y = 2 + 0.5 * x
+
+# Calculate predicted values based on fixed intercept and slope
+y_pred <- intercept + slope * x
+
+# Calculate residuals and sum of squared residuals (SSR)
+residuals <- y - y_pred
+ssr <- sum(residuals^2)
+
+# Create the formula and SSR text for display
+formula_text <- paste0("y = ", intercept, " + ", slope, "x")
+ssr_text <- paste("Sum of Squared Residuals (SSR):", round(ssr, 2))
+
+# Base plot
+plot(x, y, main = "Static Linear Regression Example", xlab = "X", ylab = "Y", 
+     pch = 16, col = "black", cex = 1.2)
+
+# Add the regression line
+lines(x, y_pred, col = "blue", lwd = 2)
+
+# Add vertical lines for residuals
+segments(x0 = x, y0 = y, x1 = x, y1 = y_pred, col = "red", lty = 2)
+
+# Add formula and SSR text to the plot
+text(x = 5, y = max(y) - 1, labels = formula_text, pos = 4, col = "darkred", cex = 1.2)
+
+
+# Add legend
+legend("topleft", legend = c("Data", "Regression Line", "Residuals"), 
+       col = c("black", "blue", "red"), pch = c(16, NA, NA), lty = c(NA, 1, 2), lwd = c(NA, 2, 1))
+
+```
+
+
+## Example LM {.smaller}
+
+Linear regression chooses the line that minimizes the sum of squared residuals (we square them so they are all positive). Try changing the inputs to see how the line and sum of squared residuals changes.
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Input panel for adjusting intercept and slope
+inputPanel(
+  sliderInput("intercept", "Intercept (β₀):", min = 0, max = 5, value = 0 , step = 0.1),
+  sliderInput("slope", "Slope (β₁):", min = 0, max =2, value =1 , step = 0.05)
+)
+
+# Output plot panel
+plotOutput("regressionPlot")
+
+# Server-side logic for plotting
+output$regressionPlot <- renderPlot({
+  set.seed(123)  # Set seed for reproducibility
+  
+  # Generate sample data
+  x <- seq(0, 15, by = 0.25)
+  y <- 2 + 0.5 * x + rnorm(length(x), mean = 0, sd = 3)  # True relationship: y = 2 + 0.5 * x
+  
+  # Apply user inputs for intercept and slope
+  user_intercept <- input$intercept
+  user_slope <- input$slope
+  y_pred <- user_intercept + user_slope * x
+  
+    # Calculate the sum of squared residuals (SSR)
+  residuals <- y - y_pred
+  ssr <- sum(residuals^2)
+  
+ # Create the formula as a text string based on user inputs
+  formula_text <- paste0("y = ", round(user_intercept, 2), " + ", round(user_slope, 2), "x", " + ", "Ɛ" )
+  ssr_text <- paste("Sum of Squared Residuals (SSR):", round(ssr, 2))
+  
+  # Plot
+  plot(x, y, main = "Simple Linear Regression Example", xlab = "X", ylab = "Y", pch = 16, col = "black", cex = 1.2)
+  lines(x, y_pred, col = "blue", lwd = 2)
+  
+  # Add vertical lines from each point to the regression line
+  segments(x0 = x, y0 = y, x1 = x, y1 = y_pred, col = "red", lty = 2)
+  
+  # Add the formula to the plot
+  text(x = 5, y = max(y) - 1, labels = formula_text, pos = 4, col = "darkgreen", cex = 1.2)
+  text(x = 5, y = max(y) - 3, labels = ssr_text, pos = 4, col = "red", cex = 1.2)
+  
+  # Add legend
+  legend("topleft", legend = c("Data", "Regression Line", "Residuals"), 
+         col = c("black", "blue", "red"), pch = c(16, NA, NA), lty = c(NA, 1, 2), lwd = c(NA, 2, 1))
+})
+
+
+
+```
+
+## Beta example {.smaller}
+
+Daily stock returns regressed on daily market returns can help us estimate the beta coefficient. Choose a stock and index and try it out.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#{{{
+library(quantmod)
+library(ggplot2)
+
+inputPanel(
+  textInput("ticker", label = "Stock Ticker", value = "TSLA"),
+  textInput("marketIndex", label = "Market Index Ticker", value = "^GSPC"),
+  dateRangeInput("dateRange", label = "Date Range", start = "2015-01-01", end = Sys.Date())
+)
+
+# Output plot panel
+plotOutput("betaPlot")
+
+# Server-side rendering logic
+output$betaPlot <- renderPlot({
+  # Validate input
+  validate(
+    need(input$ticker != "", "Please enter a valid US stock ticker."),
+    need(input$marketIndex != "", "Please enter a valid market index ticker.")
+  )
+  
+  # Fetch market index data
+  market <- tryCatch({
+    getSymbols(input$marketIndex, src = "yahoo", auto.assign = FALSE)
+  }, error = function(e) {
+    stop("Could not retrieve market index data. Please check the ticker.")
+  })
+  adjMarket <- Ad(market)
+  marketRet <- Delt(adjMarket)[-1]
+  
+  # Fetch selected stock data
+  stock <- tryCatch({
+    getSymbols(input$ticker, src = "yahoo", auto.assign = FALSE)
+  }, error = function(e) {
+    stop("Could not retrieve stock data. Please check the ticker.")
+  })
+  adjStock <- Ad(stock)
+  stockRet <- Delt(adjStock)[-1]
+  
+  # Filter by date range
+  stockRet <- stockRet[paste(input$dateRange[1], '/', input$dateRange[2], sep = "")]
+  marketRet <- marketRet[paste(input$dateRange[1], '/', input$dateRange[2], sep = "")]
+  
+  # Merge stock and market returns
+  data <- merge(stockRet, marketRet, join = "inner")
+  colnames(data) <- c("Stock Return", "Market Return")
+  
+  # Perform linear regression
+  reg <- lm(as.vector(data$`Stock Return`) ~ as.vector(data$`Market Return`))
+  
+  # Plot with ggplot2
+  p <- ggplot(data, aes(x = `Market Return`, y = `Stock Return`)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = TRUE) +
+    labs(
+      title = paste("Beta Coefficient =", round(coef(reg)[2], 2)),
+      x = "Market Returns",
+      y = "Stock Returns"
+    ) +
+    theme_minimal()
+  
+  print(p)
+})
+#}}}
+```
 
 
